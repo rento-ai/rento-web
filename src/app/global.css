@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --bg: #f4f2ec;
+  --surface: #ffffff;
+  --ink: #14201f;
+  --muted: #566562;
+  --line: #e7e3d8;
+  --line-strong: #d4cfc0;
+  --teal: #0e5e57;
+  --teal-deep: #0b3b37;
+  --teal-tint: #dcebe8;
+  --saffron: #e8a33d;
+  --green: #14602f;
+  --green-tint: #e3f1e8;
+  --red: #8a2a0c;
+  --red-tint: #fbe3da;
+  --amber: #6e4604;
+  --amber-tint: #faebc8;
+  --blue: #1f4378;
+  --blue-tint: #e4ecf7;
+  --gray: #4a5654;
+  --gray-tint: #ece9e0;
+  --sub: #f8f6f0;
+  --warn: #fbede0;
+  --sidebar: #0b3b37;
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --primary: var(--teal);
+  --primary-foreground: #ffffff;
+  --border: var(--line);
+  --input: var(--line-strong);
+  --destructive: var(--red);
+  --ring: var(--teal);
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-primary: var(--teal);
+  --color-primary-foreground: #ffffff;
+  --color-muted-foreground: var(--muted);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-destructive: var(--red);
+  --color-sidebar: var(--sidebar);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --radius-xl: 12px;
+  --radius-2xl: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.45;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-print,
+  .receipt-print * {
+    visibility: visible;
+  }
+  .receipt-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
