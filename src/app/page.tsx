@@ -5,13 +5,12 @@ import { useEffect } from "react";
 import { AppRoutes } from "@/components/app-routes";
 import { Skeleton } from "@/components/skeleton";
 import { RoleEnum } from "@/enums/role.enum";
-import { userById } from "@/lib/pg";
-import usePgStore from "@/store/usePg.store";
+import useUserStore from "@/store/useUser.store";
 
 export default function HomePage() {
   const router = useRouter();
-  const hydrated = usePgStore((state) => state.hydrated);
-  const user = usePgStore((state) => userById(state.db, state.uid));
+  const hydrated = useUserStore((state) => state.hydrated);
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     if (!hydrated) return;

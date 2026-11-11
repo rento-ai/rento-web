@@ -10,14 +10,7 @@ import {
   formatDayMonth,
   formatInr,
 } from "@/lib/constants";
-import {
-  balance,
-  chargesOf,
-  owed,
-  paidOn,
-  tenantById,
-  userById,
-} from "@/lib/pg";
+import { balance, chargesOf, paidOn, tenantById, userById } from "@/lib/pg";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -36,20 +29,9 @@ export default function TenantRentPage() {
         payment.tenantId === tenant.id && payment.method !== "Credit",
     )
     .slice(0, 12);
-  const due = owed(db, tenant);
 
   return (
     <>
-      {due > 0 ? (
-        <RentoButton
-          variant="primary"
-          size="lg"
-          className="w-full"
-          onClick={() => openModal({ type: "upi" })}
-        >
-          Pay {formatInr(due)} with UPI
-        </RentoButton>
-      ) : null}
       <Card className="flex flex-col">
         <h3 className="mb-1 text-[17px] font-extrabold">Monthly charges</h3>
         {charges.map((charge) => {

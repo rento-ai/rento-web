@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ComplaintPopup,
-  NewPgPopup,
-  PhotoPopup,
-  PropertyPopup,
-  StaffPopup,
-  UpiPopup,
-} from "@/components/popups/ops-popups";
+import { PhotoPopup } from "@/components/popups/ops-popups";
 import {
   BulkPopup,
   FloorPopup,
@@ -30,7 +23,6 @@ import useUiStore from "@/store/useUi.store";
 export function ModalHost() {
   const modal = useUiStore((state) => state.modal);
   if (!modal) return null;
-  if (modal.type === "new-pg") return <NewPgPopup />;
   if (modal.type === "check-in") return <CheckInPopup bedId={modal.bedId} />;
   if (modal.type === "checked-in")
     return <CheckedInPopup result={modal.result} />;
@@ -45,18 +37,13 @@ export function ModalHost() {
     return <TransferPopup tenantId={modal.tenantId} />;
   if (modal.type === "notice") return <NoticePopup tenantId={modal.tenantId} />;
   if (modal.type === "adjust") return <AdjustPopup tenantId={modal.tenantId} />;
-  if (modal.type === "upi") return <UpiPopup />;
-  if (modal.type === "complaint") return <ComplaintPopup />;
   if (modal.type === "photo")
     return <PhotoPopup src={modal.src} label={modal.label} />;
-  if (modal.type === "add-staff") return <StaffPopup />;
-  if (modal.type === "add-property") return <PropertyPopup />;
-  if (modal.type === "edit-property")
-    return <PropertyPopup propertyId={modal.propertyId} />;
   if (modal.type === "add-floor") return <FloorPopup />;
   if (modal.type === "rename-floor")
     return <FloorPopup floorKey={modal.floorKey} />;
   if (modal.type === "room")
     return <RoomPopup roomId={modal.roomId} floorKey={modal.floorKey} />;
-  return <BulkPopup />;
+  if (modal.type === "bulk") return <BulkPopup />;
+  return null;
 }

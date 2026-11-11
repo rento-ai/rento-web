@@ -54,13 +54,6 @@ export default function SetupPage() {
             label: item.name,
           }))}
         />
-        <RentoButton
-          size="sm"
-          onClick={() => openModal({ type: "add-property" })}
-        >
-          <Plus />
-          Add property
-        </RentoButton>
       </div>
       {!property ? (
         <Card className="text-center text-sm text-[var(--muted)]">
@@ -88,14 +81,6 @@ export default function SetupPage() {
                 · {property.area}
               </span>
             </h3>
-            <RentoButton
-              size="sm"
-              onClick={() =>
-                openModal({ type: "edit-property", propertyId: property.id })
-              }
-            >
-              Edit property
-            </RentoButton>
             <RentoButton
               size="sm"
               onClick={() => openModal({ type: "add-floor" })}

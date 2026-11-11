@@ -1,6 +1,5 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { ComplaintDetail } from "@/components/complaint-detail";
 import { RentoButton } from "@/components/rento-button";
 import { StatusPill } from "@/components/status-pill";
@@ -14,7 +13,6 @@ export default function TenantHelpPage() {
   const user = usePgStore((state) => userById(state.db, state.uid));
   const complaintId = useUiStore((state) => state.complaintId);
   const setComplaintId = useUiStore((state) => state.setComplaintId);
-  const openModal = useUiStore((state) => state.openModal);
   const list = visibleComplaints(db, user);
   const selected = list.find((item) => item.id === complaintId);
 
@@ -39,15 +37,6 @@ export default function TenantHelpPage() {
 
   return (
     <>
-      <RentoButton
-        variant="primary"
-        size="lg"
-        className="w-full"
-        onClick={() => openModal({ type: "complaint" })}
-      >
-        <Plus />
-        New complaint
-      </RentoButton>
       {list.length ? (
         list.map((item) => (
           <button

@@ -25,9 +25,11 @@ import {
 import { bedInfo, tenantById, userById } from "@/lib/pg";
 import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
+import useUserStore from "@/store/useUser.store";
 
 export default function TenantProfilePage() {
   const router = useRouter();
+  const clearUser = useUserStore((state) => state.clearUser);
   const db = usePgStore((state) => state.db);
   const user = usePgStore((state) => userById(state.db, state.uid));
   const tenant = tenantById(db, user?.tenantId);
@@ -62,6 +64,7 @@ export default function TenantProfilePage() {
         className="w-full"
         onClick={async () => {
           await ApiService.logout();
+          clearUser();
           router.replace(AppRoutes.Login);
         }}
       >
