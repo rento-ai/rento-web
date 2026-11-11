@@ -24,6 +24,7 @@ import { can, openComplaintCount, pendingPayments, userById } from "@/lib/pg";
 import { cn } from "@/lib/utils";
 import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
+import useUserStore from "@/store/useUser.store";
 
 const items = [
   { href: AppRoutes.Dashboard, label: "Dashboard", icon: LayoutDashboard },
@@ -57,10 +58,12 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const db = usePgStore((state) => state.db);
-  const user = usePgStore((state) => userById(state.db, state.uid));
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const pgUser = usePgStore((state) => userById(state.db, state.uid));
   if (!user) return null;
-  const complaints = openComplaintCount(db, user);
-  const pending = can(db, user, "confirm") ? pendingPayments(db).length : 0;
+  const complaints = openComplaintCount(db, pgUser);
+  const pending = can(db, pgUser, "confirm") ? pendingPayments(db).length : 0;
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col gap-6 bg-[var(--sidebar)] px-4 py-6 text-white md:flex">
@@ -117,6 +120,7 @@ export function AppSidebar() {
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/25 text-sm font-bold"
           onClick={async () => {
             await ApiService.logout();
+            clearUser();
             router.replace(AppRoutes.Login);
           }}
         >
@@ -131,10 +135,11 @@ export function AppSidebar() {
 export function MobileNav() {
   const pathname = usePathname();
   const db = usePgStore((state) => state.db);
-  const user = usePgStore((state) => userById(state.db, state.uid));
+  const user = useUserStore((state) => state.user);
+  const pgUser = usePgStore((state) => userById(state.db, state.uid));
   if (!user) return null;
-  const complaints = openComplaintCount(db, user);
-  const pending = can(db, user, "confirm") ? pendingPayments(db).length : 0;
+  const complaints = openComplaintCount(db, pgUser);
+  const pending = can(db, pgUser, "confirm") ? pendingPayments(db).length : 0;
   return (
     <nav
       className="no-scrollbar fixed inset-x-0 bottom-0 z-30 flex gap-0.5 overflow-x-auto bg-[var(--sidebar)] px-1.5 py-1.5 md:hidden"

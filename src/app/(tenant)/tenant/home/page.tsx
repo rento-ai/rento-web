@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Check, Lock } from "lucide-react";
+import { Check, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AppRoutes } from "@/components/app-routes";
 import { Card } from "@/components/card";
@@ -63,24 +63,6 @@ export default function TenantHomePage() {
             Payment of {formatInr(pending.amount)} sent. Waiting for the owner
             to confirm.
           </div>
-        ) : null}
-        {due > 0 && !pending ? (
-          <>
-            <RentoButton
-              className="mt-3.5 w-full bg-[var(--saffron)] text-[var(--teal-deep)] hover:bg-[var(--saffron)]"
-              size="lg"
-              onClick={() => openModal({ type: "upi" })}
-            >
-              Pay with UPI
-            </RentoButton>
-            <button
-              type="button"
-              className="mt-1.5 h-11 w-full text-[13px] font-semibold text-white"
-              onClick={() => openModal({ type: "upi" })}
-            >
-              I already paid: share proof
-            </button>
-          </>
         ) : null}
       </section>
       {tenant.status === TenantStatusEnum.notice ? (
@@ -163,15 +145,6 @@ export default function TenantHomePage() {
           )}
         </div>
       </Card>
-      <RentoButton
-        variant="primary"
-        size="lg"
-        className="w-full"
-        onClick={() => openModal({ type: "complaint" })}
-      >
-        <Camera />
-        Report a problem with photo
-      </RentoButton>
     </>
   );
 }

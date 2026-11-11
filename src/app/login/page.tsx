@@ -16,20 +16,12 @@ import {
   FormMessage,
 } from "@/components/form";
 import { Input } from "@/components/input";
-import { ModalHost } from "@/components/popups/modal-host";
 import { RentoButton } from "@/components/rento-button";
 import { RoleEnum } from "@/enums/role.enum";
 import { StatusCode } from "@/enums/status-code.enum";
-import {
-  BRAND_NAME,
-  DEMO_PASSWORD,
-  DEMO_TODAY,
-  formatFullDate,
-} from "@/lib/constants";
-import { userById } from "@/lib/pg";
+import { BRAND_NAME } from "@/lib/constants";
 import ApiService from "@/services/api.service";
-import usePgStore from "@/store/usePg.store";
-import useUiStore from "@/store/useUi.store";
+import useUserStore from "@/store/useUser.store";
 
 const schema = z.object({
   email: z.string().min(1, "Email is required"),
@@ -38,38 +30,39 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const demos = [
-  { label: "Owner", hint: "Full access", email: "raju@demo.in" },
-  { label: "Staff", hint: "Limited access", email: "anita@demo.in" },
-  { label: "Tenant", hint: "Student view", email: "karthik@demo.in" },
-];
-
 export default function LoginPage() {
   const router = useRouter();
-  const hydrated = usePgStore((state) => state.hydrated);
-  const openModal = useUiStore((state) => state.openModal);
+  const hydrated = useUserStore((state) => state.hydrated);
+  const user = useUserStore((state) => state.user);
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
 
   useEffect(() => {
-    if (!hydrated) return;
-    const user = userById(usePgStore.getState().db, usePgStore.getState().uid);
-    if (!user) return;
+    if (!hydrated || !user) return;
     router.replace(
       user.role === RoleEnum.tenant
         ? AppRoutes.TenantHome
         : AppRoutes.Dashboard,
     );
-  }, [hydrated, router]);
+  }, [hydrated, user, router]);
 
   const onSubmit = async (values: FormValues) => {
-    const response = await ApiService.login(values.email, values.password);
+    const response = await ApiService.login(
+      {
+        email: values.email,
+        password: values.password,
+      },
+      true,
+    );
     if (response.status !== StatusCode.SuccessOK || !response.data) {
-      form.setError("password", { message: response.message });
+      form.setError("password", {
+        message: response.message || "Invalid email or password",
+      });
       return;
     }
+    useUserStore.getState().setUser(response.data);
     router.replace(
       response.data.role === RoleEnum.tenant
         ? AppRoutes.TenantHome
@@ -91,13 +84,8 @@ export default function LoginPage() {
             Run your PG without chasing rent.
           </h1>
           <p className="mt-3.5 max-w-[440px] text-[#B7D3CE]">
-            Beds, tenants, rent, deposits and complaints in one place. This
-            frontend runs on sample data in your browser until the backend is
-            connected.
+            Beds, tenants, rent, deposits and complaints in one place.
           </p>
-        </div>
-        <div className="text-sm text-[#B7D3CE]">
-          Demo date: {formatFullDate(DEMO_TODAY)}
         </div>
       </section>
       <section className="flex items-center justify-center p-7 lg:p-12">
@@ -112,26 +100,8 @@ export default function LoginPage() {
                 Sign in
               </h2>
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Pick a demo account or type the credentials.
+                Enter your email and password to continue.
               </p>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {demos.map((demo) => (
-                <button
-                  key={demo.email}
-                  type="button"
-                  className="flex min-h-16 flex-col rounded-xl border border-[var(--line-strong)] bg-white px-2.5 py-2.5 text-left text-sm font-bold"
-                  onClick={() => {
-                    form.setValue("email", demo.email);
-                    form.setValue("password", DEMO_PASSWORD);
-                  }}
-                >
-                  {demo.label}
-                  <small className="text-xs font-medium text-[var(--muted)]">
-                    {demo.hint}
-                  </small>
-                </button>
-              ))}
             </div>
             <FormField
               control={form.control}
@@ -140,7 +110,11 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="raju@demo.in" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -155,7 +129,7 @@ export default function LoginPage() {
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder={DEMO_PASSWORD}
+                      placeholder="Your password"
                       {...field}
                     />
                   </FormControl>
@@ -172,30 +146,9 @@ export default function LoginPage() {
             >
               Sign in
             </RentoButton>
-            <p className="text-xs text-[var(--muted)]">
-              All demo passwords are <b>{DEMO_PASSWORD}</b>. New tenants you
-              check in can sign in with the email you enter.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <RentoButton
-                type="button"
-                size="sm"
-                onClick={() => openModal({ type: "new-pg" })}
-              >
-                Start with an empty PG
-              </RentoButton>
-              <RentoButton
-                type="button"
-                size="sm"
-                onClick={() => ApiService.resetDemo()}
-              >
-                Reset demo data
-              </RentoButton>
-            </div>
           </form>
         </Form>
       </section>
-      <ModalHost />
     </div>
   );
 }

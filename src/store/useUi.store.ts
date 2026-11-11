@@ -1,12 +1,10 @@
 "use client";
 
 import { create } from "zustand";
-import type { CheckInResultModel } from "@/models/pg.model";
 
 export type AppModal =
-  | { type: "new-pg" }
   | { type: "check-in"; bedId?: string }
-  | { type: "checked-in"; result: CheckInResultModel }
+  | { type: "checked-in"; result: unknown }
   | { type: "tenant"; tenantId: string }
   | { type: "pay"; tenantId: string }
   | { type: "remind"; tenantId: string }
@@ -15,12 +13,7 @@ export type AppModal =
   | { type: "transfer"; tenantId: string }
   | { type: "notice"; tenantId: string }
   | { type: "adjust"; tenantId: string }
-  | { type: "upi" }
-  | { type: "complaint" }
   | { type: "photo"; src: string; label: string }
-  | { type: "add-staff" }
-  | { type: "add-property" }
-  | { type: "edit-property"; propertyId: string }
   | { type: "add-floor" }
   | { type: "rename-floor"; floorKey: string }
   | { type: "room"; roomId?: string; floorKey?: string }

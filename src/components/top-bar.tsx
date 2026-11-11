@@ -14,6 +14,7 @@ import {
 import { unreadCount, userById } from "@/lib/pg";
 import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
+import useUserStore from "@/store/useUser.store";
 
 const titles: Record<string, string> = {
   [AppRoutes.Dashboard]: "Dashboard",
@@ -35,8 +36,9 @@ export function TopBar() {
   const db = usePgStore((state) => state.db);
   const propertyId = usePgStore((state) => state.propertyId);
   const setPropertyId = usePgStore((state) => state.setPropertyId);
-  const user = usePgStore((state) => userById(state.db, state.uid));
-  const notes = unreadCount(db, user);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const pgUser = usePgStore((state) => userById(state.db, state.uid));
+  const notes = unreadCount(db, pgUser);
 
   return (
     <header className="sticky top-0 z-10 flex flex-wrap items-center gap-3 border-b border-[var(--line)] bg-[var(--bg)] px-8 py-4 max-md:px-4">
@@ -81,6 +83,7 @@ export function TopBar() {
         aria-label="Log out"
         onClick={async () => {
           await ApiService.logout();
+          clearUser();
           router.replace(AppRoutes.Login);
         }}
       >

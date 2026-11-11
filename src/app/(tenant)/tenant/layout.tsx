@@ -20,6 +20,7 @@ import { bedInfo, tenantById, unreadCount, userById } from "@/lib/pg";
 import { cn } from "@/lib/utils";
 import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
+import useUserStore from "@/store/useUser.store";
 
 const tabs = [
   { href: AppRoutes.TenantHome, label: "Home", icon: Home },
@@ -44,11 +45,13 @@ export default function TenantLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const hydrated = usePgStore((state) => state.hydrated);
+  const hydrated = useUserStore((state) => state.hydrated);
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
   const db = usePgStore((state) => state.db);
-  const user = usePgStore((state) => userById(state.db, state.uid));
-  const tenant = tenantById(db, user?.tenantId);
-  const unread = unreadCount(db, user);
+  const pgUser = usePgStore((state) => userById(state.db, state.uid));
+  const tenant = tenantById(db, pgUser?.tenantId);
+  const unread = unreadCount(db, pgUser);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -56,7 +59,7 @@ export default function TenantLayout({
     else if (user.role !== RoleEnum.tenant) router.replace(AppRoutes.Dashboard);
   }, [hydrated, user, router]);
 
-  if (!hydrated || !user || !tenant || user.role !== RoleEnum.tenant) {
+  if (!hydrated || !user || user.role !== RoleEnum.tenant) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Skeleton className="h-12 w-40" />
@@ -64,19 +67,20 @@ export default function TenantLayout({
     );
   }
 
-  const info = bedInfo(db, tenant.bedId);
+  const displayName = tenant?.name ?? user.name;
+  const info = tenant?.bedId ? bedInfo(db, tenant.bedId) : null;
   const title =
     pathname === AppRoutes.TenantHome
-      ? `Hi ${tenant.name.split(" ")[0]}`
+      ? `Hi ${displayName.split(" ")[0]}`
       : (titles[pathname] ?? "Rento");
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col gap-4 px-[18px] pt-5 pb-28">
       <header className="flex items-center gap-3">
-        <Initials name={tenant.name} />
+        <Initials name={displayName} />
         <div className="flex-1">
           <h1 className="text-[22px] font-extrabold tracking-tight">{title}</h1>
-          {pathname === AppRoutes.TenantHome && tenant.bedId ? (
+          {pathname === AppRoutes.TenantHome && info ? (
             <p className="text-sm text-[var(--muted)]">
               {info.propertyName} · Room {info.full}
             </p>
@@ -88,6 +92,7 @@ export default function TenantLayout({
           aria-label="Log out"
           onClick={async () => {
             await ApiService.logout();
+            clearUser();
             router.replace(AppRoutes.Login);
           }}
         >

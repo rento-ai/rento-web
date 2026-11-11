@@ -1,19 +1,15 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { Card } from "@/components/card";
 import { Initials } from "@/components/initials";
-import { RentoButton } from "@/components/rento-button";
 import { Switch } from "@/components/switch";
 import { RoleEnum } from "@/enums/role.enum";
 import { propertyById } from "@/lib/pg";
 import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
-import useUiStore from "@/store/useUi.store";
 
 export default function StaffPage() {
   const db = usePgStore((state) => state.db);
-  const openModal = useUiStore((state) => state.openModal);
   const staff = db.users.filter((user) => user.role === RoleEnum.staff);
 
   return (
@@ -21,14 +17,6 @@ export default function StaffPage() {
       <Card className="flex flex-col gap-3.5">
         <div className="flex items-center">
           <h3 className="flex-1 text-[17px] font-extrabold">Team</h3>
-          <RentoButton
-            size="sm"
-            variant="primary"
-            onClick={() => openModal({ type: "add-staff" })}
-          >
-            <Plus />
-            Add staff
-          </RentoButton>
         </div>
         {staff.map((person) => (
           <div key={person.id} className="flex items-center gap-3">

@@ -455,11 +455,11 @@ export function seed(): PgDatabase {
 }
 
 export function seedEmpty(input: {
-  name: string;
+  organizationName: string;
+  ownerName: string;
   email: string;
   password: string;
-  pgName: string;
-  area: string;
+  phone?: string;
 }): PgDatabase {
   const db = emptyDatabase();
   db.receiptCounter = 0;
@@ -467,8 +467,8 @@ export function seedEmpty(input: {
   db.properties = [
     {
       id: "p1",
-      name: input.pgName,
-      area: input.area,
+      name: input.organizationName,
+      area: "",
       bedStyle: BedStyleEnum.alpha,
       floors: [],
     },
@@ -478,12 +478,16 @@ export function seedEmpty(input: {
       id: "u_owner",
       email: input.email,
       password: input.password,
-      name: input.name,
+      name: input.ownerName,
       role: RoleEnum.owner,
     },
   ];
   db.audit = [
-    { at: nowLabel(), by: "System", text: `Created ${input.pgName}` },
+    {
+      at: nowLabel(),
+      by: "System",
+      text: `Created ${input.organizationName}`,
+    },
   ];
   return db;
 }
