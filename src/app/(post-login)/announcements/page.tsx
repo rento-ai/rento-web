@@ -9,7 +9,7 @@ import { RentoButton } from "@/components/rento-button";
 import { Textarea } from "@/components/textarea";
 import { StatusCode } from "@/enums/status-code.enum";
 import { formatFullDate } from "@/lib/constants";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 
 export default function AnnouncementsPage() {
@@ -43,7 +43,7 @@ export default function AnnouncementsPage() {
           className="w-fit"
           variant="primary"
           onClick={async () => {
-            const response = await ApiService.postAnnouncement({ title, body });
+            const response = await DesignApi.postAnnouncement({ title, body });
             if (response.status === StatusCode.SuccessOK) {
               setTitle("");
               setBody("");
@@ -83,7 +83,7 @@ export default function AnnouncementsPage() {
             if (!open) setDeleteId(null);
           }}
           onSubmit={async () => {
-            await ApiService.deleteAnnouncement(target.id);
+            await DesignApi.deleteAnnouncement(target.id);
             setDeleteId(null);
           }}
         />

@@ -6,7 +6,7 @@ import { routeForNotification } from "@/components/app-routes";
 import { Card } from "@/components/card";
 import { RentoButton } from "@/components/rento-button";
 import { myNotifications, unreadCount, userById } from "@/lib/pg";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 
 export function NotificationList() {
@@ -26,7 +26,7 @@ export function NotificationList() {
         {unread ? (
           <RentoButton
             size="sm"
-            onClick={() => ApiService.markAllNotificationsRead()}
+            onClick={() => DesignApi.markAllNotificationsRead()}
           >
             Mark all read
           </RentoButton>
@@ -40,7 +40,7 @@ export function NotificationList() {
               type="button"
               className="flex items-center gap-3 border-t border-[var(--line)] py-3 text-left first:border-0"
               onClick={async () => {
-                await ApiService.markNotificationRead(item.id);
+                await DesignApi.markNotificationRead(item.id);
                 router.push(routeForNotification(user.role, item.link));
               }}
             >

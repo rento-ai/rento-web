@@ -41,7 +41,7 @@ import {
   visibleComplaints,
 } from "@/lib/pg";
 import type { PgDatabase } from "@/models/pg.model";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -243,7 +243,7 @@ export default function DashboardPage() {
             dueList(db, propertyId, DuesFilterEnum.late).length ? (
               <RentoButton
                 className="w-fit"
-                onClick={() => ApiService.sendAllReminders()}
+                onClick={() => DesignApi.sendAllReminders()}
               >
                 <MessageSquare />
                 Remind all overdue (

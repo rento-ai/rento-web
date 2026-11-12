@@ -22,6 +22,7 @@ import {
   formatFullDate,
   formatInr,
 } from "@/lib/constants";
+import DesignApi from "@/lib/design-api";
 import { bedInfo, tenantById, userById } from "@/lib/pg";
 import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
@@ -100,7 +101,7 @@ export default function TenantProfilePage() {
               size="lg"
               className="w-full"
               onClick={async () => {
-                const response = await ApiService.recordNotice({
+                const response = await DesignApi.recordNotice({
                   tenantId: tenant.id,
                   lastDay,
                 });

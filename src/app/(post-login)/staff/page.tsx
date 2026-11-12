@@ -5,7 +5,7 @@ import { Initials } from "@/components/initials";
 import { Switch } from "@/components/switch";
 import { RoleEnum } from "@/enums/role.enum";
 import { propertyById } from "@/lib/pg";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 
 export default function StaffPage() {
@@ -55,7 +55,7 @@ export default function StaffPage() {
           <Switch
             checked={db.settings.staffPay}
             onCheckedChange={(value) =>
-              ApiService.setStaffPermission("staffPay", value === true)
+              DesignApi.setStaffPermission("staffPay", value === true)
             }
           />
           Can record and confirm payments
@@ -64,7 +64,7 @@ export default function StaffPage() {
           <Switch
             checked={db.settings.staffPrivate}
             onCheckedChange={(value) =>
-              ApiService.setStaffPermission("staffPrivate", value === true)
+              DesignApi.setStaffPermission("staffPrivate", value === true)
             }
           />
           Can see private complaints (roommate, safety)

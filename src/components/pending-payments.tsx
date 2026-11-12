@@ -6,7 +6,7 @@ import { Initials } from "@/components/initials";
 import { RentoButton } from "@/components/rento-button";
 import { formatDayMonth, formatInr } from "@/lib/constants";
 import { can, inScope, pendingPayments, tenantById, userById } from "@/lib/pg";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 
 export function PendingPayments() {
@@ -41,7 +41,7 @@ export function PendingPayments() {
             <RentoButton
               size="sm"
               variant="primary"
-              onClick={() => ApiService.confirmPayment(payment.id)}
+              onClick={() => DesignApi.confirmPayment(payment.id)}
             >
               <Check />
               Confirm
@@ -49,7 +49,7 @@ export function PendingPayments() {
             <RentoButton
               size="sm"
               variant="danger"
-              onClick={() => ApiService.rejectPayment(payment.id)}
+              onClick={() => DesignApi.rejectPayment(payment.id)}
             >
               Reject
             </RentoButton>

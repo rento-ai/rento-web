@@ -19,7 +19,7 @@ import {
   scopeBeds,
   sortedFloors,
 } from "@/lib/pg";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -225,7 +225,7 @@ export default function SetupPage() {
             if (!open) setDeleteFloorKey(null);
           }}
           onSubmit={async () => {
-            await ApiService.deleteFloor(deleteFloorKey);
+            await DesignApi.deleteFloor(deleteFloorKey);
             setDeleteFloorKey(null);
           }}
         />

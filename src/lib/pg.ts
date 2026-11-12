@@ -646,7 +646,12 @@ export function signOut(db: PgDatabase, uid: string | null): ActionResult {
 }
 
 export function createWorkspace(input: EmptyPgInput): PgDatabase {
-  return seedEmpty(input);
+  return seedEmpty({
+    organizationName: input.pgName,
+    ownerName: input.name,
+    email: input.email,
+    password: input.password,
+  });
 }
 
 export function checkInTenant(

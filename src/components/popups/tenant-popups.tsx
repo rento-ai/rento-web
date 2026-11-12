@@ -30,6 +30,7 @@ import {
   formatFullDate,
   formatInr,
 } from "@/lib/constants";
+import DesignApi from "@/lib/design-api";
 import {
   allocate,
   balance,
@@ -48,7 +49,6 @@ import {
   userById,
   vacantBeds,
 } from "@/lib/pg";
-import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -220,7 +220,7 @@ export function CheckInPopup({ bedId }: { bedId?: string }) {
           loading={loading}
           onClick={async () => {
             setLoading(true);
-            const response = await ApiService.checkInTenant({
+            const response = await DesignApi.checkInTenant({
               name,
               phone,
               email,
@@ -615,7 +615,7 @@ export function PayPopup({ tenantId }: { tenantId: string }) {
           loading={loading}
           onClick={async () => {
             setLoading(true);
-            const response = await ApiService.recordPayment({
+            const response = await DesignApi.recordPayment({
               tenantId,
               amount,
               method,
@@ -683,14 +683,14 @@ export function RemindPopup({ tenantId }: { tenantId: string }) {
           href={`https://wa.me/91${tenant.phone}?text=${encodeURIComponent(text)}`}
           target="_blank"
           rel="noreferrer"
-          onClick={() => ApiService.sendReminder(tenantId)}
+          onClick={() => DesignApi.sendReminder(tenantId)}
         >
           <MessageSquare className="size-4" /> Open in WhatsApp
         </a>
         <RentoButton
           className="w-full"
           onClick={async () => {
-            await ApiService.sendReminder(tenantId);
+            await DesignApi.sendReminder(tenantId);
             closeModal();
           }}
         >
@@ -828,7 +828,7 @@ export function CheckoutPopup({ tenantId }: { tenantId: string }) {
           loading={loading}
           onClick={async () => {
             setLoading(true);
-            const response = await ApiService.checkoutTenant({
+            const response = await DesignApi.checkoutTenant({
               tenantId,
               deduction,
               reason,
@@ -915,7 +915,7 @@ export function TransferPopup({ tenantId }: { tenantId: string }) {
           size="lg"
           className="w-full"
           onClick={async () => {
-            const response = await ApiService.transferTenant({
+            const response = await DesignApi.transferTenant({
               tenantId,
               bedId,
               date,
@@ -963,7 +963,7 @@ export function NoticePopup({ tenantId }: { tenantId: string }) {
           size="lg"
           className="w-full"
           onClick={async () => {
-            const response = await ApiService.recordNotice({
+            const response = await DesignApi.recordNotice({
               tenantId,
               lastDay,
             });
@@ -1024,7 +1024,7 @@ export function AdjustPopup({ tenantId }: { tenantId: string }) {
           size="lg"
           className="w-full"
           onClick={async () => {
-            const response = await ApiService.adjustTenant({
+            const response = await DesignApi.adjustTenant({
               tenantId,
               kind,
               amount,

@@ -20,7 +20,7 @@ import { ASSIGNEES, formatDayMonth } from "@/lib/constants";
 import { bedInfo, complaintTone, tenantById, userById } from "@/lib/pg";
 import { cn } from "@/lib/utils";
 import type { ComplaintModel } from "@/models/pg.model";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import { ToastService } from "@/services/toast.service";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
@@ -153,7 +153,7 @@ export function ComplaintDetail({
             variant="primary"
             className="w-fit"
             onClick={async () => {
-              const response = await ApiService.updateComplaint({
+              const response = await DesignApi.updateComplaint({
                 complaintId: complaint.id,
                 status,
                 assignee: assignee === "none" ? "" : assignee,
@@ -174,13 +174,13 @@ export function ComplaintDetail({
           <div className="mt-2.5 flex flex-wrap gap-2">
             <RentoButton
               variant="primary"
-              onClick={() => ApiService.confirmComplaint(complaint.id)}
+              onClick={() => DesignApi.confirmComplaint(complaint.id)}
             >
               <Check />
               Yes, it is fixed
             </RentoButton>
             <RentoButton
-              onClick={() => ApiService.reopenComplaint(complaint.id)}
+              onClick={() => DesignApi.reopenComplaint(complaint.id)}
             >
               Not fixed, reopen
             </RentoButton>
@@ -220,7 +220,7 @@ export function ComplaintDetail({
             variant="primary"
             onClick={async () => {
               if (!message.trim()) return;
-              await ApiService.sendComplaintMessage(complaint.id, message);
+              await DesignApi.sendComplaintMessage(complaint.id, message);
               setMessage("");
             }}
           >

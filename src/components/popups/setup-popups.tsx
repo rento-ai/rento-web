@@ -25,7 +25,7 @@ import {
   sortedFloors,
   suggestRoomLabel,
 } from "@/lib/pg";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -80,8 +80,8 @@ export function FloorPopup({ floorKey }: { floorKey?: string }) {
           className="w-full"
           onClick={async () => {
             const response = floorKey
-              ? await ApiService.renameFloor(floorKey, label)
-              : await ApiService.addFloor({ number, label });
+              ? await DesignApi.renameFloor(floorKey, label)
+              : await DesignApi.addFloor({ number, label });
             if (response.status !== StatusCode.SuccessOK) {
               setError(response.message);
               return;
@@ -151,7 +151,7 @@ export function RoomPopup({
 
   const saveExisting = async () => {
     if (!room) return false;
-    const response = await ApiService.updateRoom({
+    const response = await DesignApi.updateRoom({
       roomId: room.id,
       label,
       floorKey: floor,
@@ -292,7 +292,7 @@ export function RoomPopup({
               <RentoButton
                 size="sm"
                 onClick={async () => {
-                  if (await saveExisting()) await ApiService.addBed(room.id);
+                  if (await saveExisting()) await DesignApi.addBed(room.id);
                 }}
               >
                 <Plus />
@@ -340,7 +340,7 @@ export function RoomPopup({
                         size="sm"
                         onClick={async () => {
                           if (await saveExisting())
-                            await ApiService.toggleBedService(bed.id);
+                            await DesignApi.toggleBedService(bed.id);
                         }}
                       >
                         {bed.outOfService ? "Restore" : "Out of service"}
@@ -351,7 +351,7 @@ export function RoomPopup({
                         aria-label={`Remove bed ${bed.label}`}
                         onClick={async () => {
                           if (await saveExisting())
-                            await ApiService.removeBed(room.id, bed.id);
+                            await DesignApi.removeBed(room.id, bed.id);
                         }}
                       >
                         <X />
@@ -384,7 +384,7 @@ export function RoomPopup({
               if (saved) closeModal();
               return;
             }
-            const response = await ApiService.addRoom({
+            const response = await DesignApi.addRoom({
               label,
               floorKey: floor,
               beds,
@@ -406,7 +406,7 @@ export function RoomPopup({
             className="w-full"
             variant={used ? "default" : "danger"}
             onClick={async () => {
-              const response = await ApiService.removeOrArchiveRoom(room.id);
+              const response = await DesignApi.removeOrArchiveRoom(room.id);
               if (response.status !== StatusCode.SuccessOK) {
                 setError(response.message);
                 return;
@@ -608,7 +608,7 @@ export function BulkPopup() {
           disabled={!!plan.error}
           onClick={async () => {
             setLoading(true);
-            const response = await ApiService.bulkCreateRooms({
+            const response = await DesignApi.bulkCreateRooms({
               firstFloor,
               floors: floorCount,
               roomsPerFloor,

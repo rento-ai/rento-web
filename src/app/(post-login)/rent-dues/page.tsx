@@ -11,7 +11,7 @@ import { DuesFilterEnum, PaymentStatusEnum } from "@/enums/pg.enum";
 import { RoleEnum } from "@/enums/role.enum";
 import { formatDayMonth, formatInr, nextMonth } from "@/lib/constants";
 import { dueList, inScope, tenantById, userById } from "@/lib/pg";
-import ApiService from "@/services/api.service";
+import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -61,7 +61,7 @@ export default function RentDuesPage() {
           ]}
         />
         {user?.role === RoleEnum.owner ? (
-          <RentoButton onClick={() => ApiService.generateRent()}>
+          <RentoButton onClick={() => DesignApi.generateRent()}>
             Generate {upcoming.label} rent
           </RentoButton>
         ) : null}

@@ -1,10 +1,11 @@
 "use client";
 
 import { create } from "zustand";
+import type { CheckInResultModel } from "@/models/pg.model";
 
 export type AppModal =
   | { type: "check-in"; bedId?: string }
-  | { type: "checked-in"; result: unknown }
+  | { type: "checked-in"; result: CheckInResultModel }
   | { type: "tenant"; tenantId: string }
   | { type: "pay"; tenantId: string }
   | { type: "remind"; tenantId: string }
