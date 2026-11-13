@@ -4,6 +4,7 @@ import { PhotoPopup } from "@/components/popups/ops-popups";
 import {
   BulkPopup,
   FloorPopup,
+  PropertyPopup,
   RoomPopup,
 } from "@/components/popups/setup-popups";
 import {
@@ -39,6 +40,9 @@ export function ModalHost() {
   if (modal.type === "adjust") return <AdjustPopup tenantId={modal.tenantId} />;
   if (modal.type === "photo")
     return <PhotoPopup src={modal.src} label={modal.label} />;
+  if (modal.type === "add-property") return <PropertyPopup />;
+  if (modal.type === "edit-property")
+    return <PropertyPopup propertyId={modal.propertyId} />;
   if (modal.type === "add-floor") return <FloorPopup />;
   if (modal.type === "rename-floor")
     return <FloorPopup floorKey={modal.floorKey} />;

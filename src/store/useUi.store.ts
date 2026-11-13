@@ -15,6 +15,8 @@ export type AppModal =
   | { type: "notice"; tenantId: string }
   | { type: "adjust"; tenantId: string }
   | { type: "photo"; src: string; label: string }
+  | { type: "add-property" }
+  | { type: "edit-property"; propertyId: string }
   | { type: "add-floor" }
   | { type: "rename-floor"; floorKey: string }
   | { type: "room"; roomId?: string; floorKey?: string }

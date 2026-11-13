@@ -12,8 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
+import { BedStyleEnum } from "@/enums/pg.enum";
 import { StatusCode } from "@/enums/status-code.enum";
 import { formatInr, ROOM_TYPES } from "@/lib/constants";
+import DesignApi from "@/lib/design-api";
 import {
   activeSetupProperty,
   bedRent,
@@ -25,7 +27,6 @@ import {
   sortedFloors,
   suggestRoomLabel,
 } from "@/lib/pg";
-import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -622,6 +623,80 @@ export function BulkPopup() {
           }}
         >
           Create rooms and beds
+        </RentoButton>
+      </div>
+    </PopupFrame>
+  );
+}
+
+export function PropertyPopup({ propertyId }: { propertyId?: string }) {
+  const db = usePgStore((state) => state.db);
+  const closeModal = useUiStore((state) => state.closeModal);
+  const existing = db.properties.find((property) => property.id === propertyId);
+  const [name, setName] = useState(existing?.name ?? "");
+  const [area, setArea] = useState(existing?.area ?? "");
+  const [bedStyle, setBedStyle] = useState<BedStyleEnum>(
+    existing?.bedStyle ?? BedStyleEnum.alpha,
+  );
+  const [error, setError] = useState("");
+
+  return (
+    <PopupFrame title={existing ? "Edit property" : "Add property"}>
+      <div className="flex flex-col gap-3.5">
+        <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
+          Name
+          <Input
+            value={name}
+            placeholder="e.g. Green Valley Hostel"
+            onChange={(event) => setName(event.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
+          Locality
+          <Input
+            value={area}
+            placeholder="e.g. Madhapur"
+            onChange={(event) => setArea(event.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
+          Bed labels
+          <Select
+            value={bedStyle}
+            onValueChange={(value) => setBedStyle(value as BedStyleEnum)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={BedStyleEnum.alpha}>A, B, C, D …</SelectItem>
+              <SelectItem value={BedStyleEnum.num}>1, 2, 3, 4 …</SelectItem>
+            </SelectContent>
+          </Select>
+        </label>
+        {error ? (
+          <p className="text-[13px] font-semibold text-[var(--red)]">{error}</p>
+        ) : null}
+        <RentoButton
+          variant="primary"
+          size="lg"
+          className="w-full"
+          onClick={async () => {
+            const response = existing
+              ? await DesignApi.updateProperty(existing.id, {
+                  name,
+                  area,
+                  bedStyle,
+                })
+              : await DesignApi.addProperty({ name, area, bedStyle });
+            if (response.status !== StatusCode.SuccessOK) {
+              setError(response.message);
+              return;
+            }
+            closeModal();
+          }}
+        >
+          {existing ? "Save" : "Add property"}
         </RentoButton>
       </div>
     </PopupFrame>

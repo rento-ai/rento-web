@@ -9,6 +9,7 @@ import { Segmented } from "@/components/segmented";
 import { StatusPill } from "@/components/status-pill";
 import { DuesToneEnum } from "@/enums/pg.enum";
 import { formatInr } from "@/lib/constants";
+import DesignApi from "@/lib/design-api";
 import {
   activeSetupProperty,
   bedRent,
@@ -19,7 +20,6 @@ import {
   scopeBeds,
   sortedFloors,
 } from "@/lib/pg";
-import DesignApi from "@/lib/design-api";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -54,10 +54,26 @@ export default function SetupPage() {
             label: item.name,
           }))}
         />
+        <RentoButton
+          size="sm"
+          onClick={() => openModal({ type: "add-property" })}
+        >
+          <Plus />
+          Add property
+        </RentoButton>
       </div>
       {!property ? (
-        <Card className="text-center text-sm text-[var(--muted)]">
-          No property yet. Add your first PG or hostel to begin.
+        <Card className="flex flex-col items-center gap-3 text-center">
+          <p className="text-sm text-[var(--muted)]">
+            No property yet. Add your first PG or hostel to begin.
+          </p>
+          <RentoButton
+            variant="primary"
+            onClick={() => openModal({ type: "add-property" })}
+          >
+            <Plus />
+            Add property
+          </RentoButton>
         </Card>
       ) : (
         <>
@@ -81,6 +97,14 @@ export default function SetupPage() {
                 · {property.area}
               </span>
             </h3>
+            <RentoButton
+              size="sm"
+              onClick={() =>
+                openModal({ type: "edit-property", propertyId: property.id })
+              }
+            >
+              Edit property
+            </RentoButton>
             <RentoButton
               size="sm"
               onClick={() => openModal({ type: "add-floor" })}
