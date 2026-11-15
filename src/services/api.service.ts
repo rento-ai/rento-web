@@ -1,6 +1,11 @@
 import { ApiMethodsEnum } from "@/enums/api-methods.enum";
 import type { ApiResponseModel } from "@/models/api-response.model";
 import type {
+  CreatePropertyRequestModel,
+  PropertyModel,
+  UpdatePropertyRequestModel,
+} from "@/models/property.model";
+import type {
   LoginRequestModel,
   RegisterOwnerRequestModel,
   RegisterOwnerResponseModel,
@@ -30,6 +35,54 @@ export default class ApiService {
       "auth/register-owner",
       data,
       ApiMethodsEnum.post,
+    );
+  }
+  static createProperty(
+    data: CreatePropertyRequestModel,
+    showLoader = false,
+  ): Promise<ApiResponseModel<PropertyModel>> {
+    return fetchApi<PropertyModel>(
+      "properties",
+      data,
+      ApiMethodsEnum.post,
+      showLoader,
+    );
+  }
+  static getProperties(
+    showLoader = false,
+  ): Promise<ApiResponseModel<PropertyModel[]>> {
+    return fetchApi<PropertyModel[]>(
+      "properties",
+      {},
+      ApiMethodsEnum.get,
+      showLoader,
+      600000,
+      { silent: true },
+    );
+  }
+  static getProperty(
+    id: string,
+    showLoader = false,
+  ): Promise<ApiResponseModel<PropertyModel>> {
+    return fetchApi<PropertyModel>(
+      `properties/${id}`,
+      {},
+      ApiMethodsEnum.get,
+      showLoader,
+      600000,
+      { silent: true },
+    );
+  }
+  static updateProperty(
+    id: string,
+    data: UpdatePropertyRequestModel,
+    showLoader = false,
+  ): Promise<ApiResponseModel<PropertyModel>> {
+    return fetchApi<PropertyModel>(
+      `properties/${id}`,
+      data,
+      ApiMethodsEnum.patch,
+      showLoader,
     );
   }
 }

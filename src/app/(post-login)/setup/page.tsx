@@ -1,13 +1,15 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/card";
 import { DeletePopup } from "@/components/delete-popup";
 import { RentoButton } from "@/components/rento-button";
 import { Segmented } from "@/components/segmented";
+import { Skeleton } from "@/components/skeleton";
 import { StatusPill } from "@/components/status-pill";
 import { DuesToneEnum } from "@/enums/pg.enum";
+import { StatusCode } from "@/enums/status-code.enum";
 import { formatInr } from "@/lib/constants";
 import DesignApi from "@/lib/design-api";
 import {
@@ -20,6 +22,7 @@ import {
   scopeBeds,
   sortedFloors,
 } from "@/lib/pg";
+import { refreshProperties } from "@/lib/property-sync";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -30,6 +33,8 @@ export default function SetupPage() {
   const openModal = useUiStore((state) => state.openModal);
   const property = activeSetupProperty(db, setupPropertyId);
   const [deleteFloorKey, setDeleteFloorKey] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const floors = property ? sortedFloors(db, property) : [];
   const rooms = property
     ? propertyRooms(db, property.id).filter((room) => !room.archived)
@@ -42,18 +47,51 @@ export default function SetupPage() {
       )
     : 0;
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError("");
+      const response = await refreshProperties(true);
+      if (cancelled) return;
+      if (response.status !== StatusCode.SuccessOK || !response.data) {
+        setError(response.message || "Could not load properties");
+        usePgStore.setState((state) => ({
+          db: { ...state.db, properties: [] },
+          setupPropertyId: null,
+        }));
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-11 w-full max-w-md" />
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <Segmented
-          label="Property"
-          value={property?.id ?? ""}
-          onChange={setSetupPropertyId}
-          options={db.properties.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }))}
-        />
+        {db.properties.length ? (
+          <Segmented
+            label="Property"
+            value={property?.id ?? ""}
+            onChange={setSetupPropertyId}
+            options={db.properties.map((item) => ({
+              value: item.id,
+              label: item.name,
+            }))}
+          />
+        ) : null}
         <RentoButton
           size="sm"
           onClick={() => openModal({ type: "add-property" })}
@@ -62,6 +100,9 @@ export default function SetupPage() {
           Add property
         </RentoButton>
       </div>
+      {error ? (
+        <Card className="text-sm font-semibold text-[var(--red)]">{error}</Card>
+      ) : null}
       {!property ? (
         <Card className="flex flex-col items-center gap-3 text-center">
           <p className="text-sm text-[var(--muted)]">

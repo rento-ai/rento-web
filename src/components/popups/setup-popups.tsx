@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/input";
 import { PopupFrame } from "@/components/popups/popup-frame";
 import { RentoButton } from "@/components/rento-button";
@@ -27,6 +27,8 @@ import {
   sortedFloors,
   suggestRoomLabel,
 } from "@/lib/pg";
+import { normalizeApiProperty, syncPropertyToStore } from "@/lib/property-sync";
+import ApiService from "@/services/api.service";
 import usePgStore from "@/store/usePg.store";
 import useUiStore from "@/store/useUi.store";
 
@@ -633,44 +635,111 @@ export function PropertyPopup({ propertyId }: { propertyId?: string }) {
   const db = usePgStore((state) => state.db);
   const closeModal = useUiStore((state) => state.closeModal);
   const existing = db.properties.find((property) => property.id === propertyId);
+  const isEdit = Boolean(propertyId);
   const [name, setName] = useState(existing?.name ?? "");
+  const [city, setCity] = useState("");
   const [area, setArea] = useState(existing?.area ?? "");
-  const [bedStyle, setBedStyle] = useState<BedStyleEnum>(
-    existing?.bedStyle ?? BedStyleEnum.alpha,
+  const [address, setAddress] = useState("");
+  const [bedLabelStyle, setBedLabelStyle] = useState<"alpha" | "numeric">(
+    existing?.bedStyle === BedStyleEnum.alpha ? "alpha" : "numeric",
   );
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(isEdit);
+  const [ready, setReady] = useState(!isEdit);
+
+  useEffect(() => {
+    if (!propertyId) {
+      setFetching(false);
+      setReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      setFetching(true);
+      setReady(false);
+      setError("");
+      const response = await ApiService.getProperty(propertyId);
+      if (cancelled) return;
+
+      const property = normalizeApiProperty(response.data);
+      if (response.status !== StatusCode.SuccessOK || !property) {
+        setError(response.message || "Could not load property");
+        setFetching(false);
+        setReady(false);
+        return;
+      }
+
+      setName(property.name);
+      setCity(property.city);
+      setArea(property.area ?? "");
+      setAddress(property.address ?? "");
+      setBedLabelStyle(property.bed_label_style);
+      syncPropertyToStore(property);
+      setFetching(false);
+      setReady(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [propertyId]);
 
   return (
-    <PopupFrame title={existing ? "Edit property" : "Add property"}>
+    <PopupFrame title={isEdit ? "Edit property" : "Add property"}>
       <div className="flex flex-col gap-3.5">
-        <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
+        <label className="imp flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
           Name
           <Input
             value={name}
             placeholder="e.g. Green Valley Hostel"
+            disabled={fetching}
             onChange={(event) => setName(event.target.value)}
           />
         </label>
+        <label className="imp flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
+          City
+          <Input
+            value={city}
+            placeholder="e.g. Hyderabad"
+            disabled={fetching}
+            onChange={(event) => setCity(event.target.value)}
+          />
+        </label>
         <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
-          Locality
+          Area / locality
           <Input
             value={area}
             placeholder="e.g. Madhapur"
+            disabled={fetching}
             onChange={(event) => setArea(event.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
+          Address
+          <Input
+            value={address}
+            placeholder="Street, landmark (optional)"
+            disabled={fetching}
+            onChange={(event) => setAddress(event.target.value)}
           />
         </label>
         <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-[var(--muted)]">
           Bed labels
           <Select
-            value={bedStyle}
-            onValueChange={(value) => setBedStyle(value as BedStyleEnum)}
+            value={bedLabelStyle}
+            disabled={fetching}
+            onValueChange={(value) =>
+              setBedLabelStyle(value as "alpha" | "numeric")
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={BedStyleEnum.alpha}>A, B, C, D …</SelectItem>
-              <SelectItem value={BedStyleEnum.num}>1, 2, 3, 4 …</SelectItem>
+              <SelectItem value="alpha">A, B, C, D …</SelectItem>
+              <SelectItem value="numeric">1, 2, 3, 4 …</SelectItem>
             </SelectContent>
           </Select>
         </label>
@@ -681,22 +750,78 @@ export function PropertyPopup({ propertyId }: { propertyId?: string }) {
           variant="primary"
           size="lg"
           className="w-full"
+          loading={loading || fetching}
+          disabled={fetching || (isEdit && !ready)}
           onClick={async () => {
-            const response = existing
-              ? await DesignApi.updateProperty(existing.id, {
-                  name,
-                  area,
-                  bedStyle,
-                })
-              : await DesignApi.addProperty({ name, area, bedStyle });
-            if (response.status !== StatusCode.SuccessOK) {
-              setError(response.message);
+            setError("");
+            const nextName = name.trim();
+            const nextCity = city.trim();
+            const nextArea = area.trim();
+            const nextAddress = address.trim();
+
+            if (!nextName) {
+              setError("Name is required");
               return;
             }
+            if (!nextCity) {
+              setError("City is required");
+              return;
+            }
+
+            setLoading(true);
+            if (propertyId) {
+              const response = await ApiService.updateProperty(
+                propertyId,
+                {
+                  name: nextName,
+                  city: nextCity,
+                  area: nextArea || undefined,
+                  address: nextAddress || undefined,
+                  bed_label_style: bedLabelStyle,
+                },
+                true,
+              );
+              const updated = normalizeApiProperty(response.data);
+              if (response.status !== StatusCode.SuccessOK || !updated) {
+                setLoading(false);
+                setError(response.message || "Could not update property");
+                return;
+              }
+              syncPropertyToStore(updated);
+              setLoading(false);
+              closeModal();
+              return;
+            }
+
+            const response = await ApiService.createProperty(
+              {
+                name: nextName,
+                city: nextCity,
+                area: nextArea || undefined,
+                address: nextAddress || undefined,
+                bed_label_style: bedLabelStyle,
+              },
+              true,
+            );
+
+            const created = normalizeApiProperty(response.data);
+            if (
+              (response.status !== StatusCode.SuccessOK &&
+                response.status !== StatusCode.SuccessCreated) ||
+              !created
+            ) {
+              setLoading(false);
+              setError(response.message || "Could not create property");
+              return;
+            }
+
+            syncPropertyToStore(created);
+            usePgStore.getState().setSetupPropertyId(created.id);
+            setLoading(false);
             closeModal();
           }}
         >
-          {existing ? "Save" : "Add property"}
+          {isEdit ? "Save" : "Add property"}
         </RentoButton>
       </div>
     </PopupFrame>
