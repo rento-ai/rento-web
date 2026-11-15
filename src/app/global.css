@@ -80,6 +80,18 @@ textarea {
   display: none;
 }
 
+/* Mandatory field marker */
+.imp::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--red);
+  vertical-align: middle;
+}
+
 @media print {
   body * {
     visibility: hidden;
